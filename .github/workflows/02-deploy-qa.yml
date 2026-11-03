@@ -1,0 +1,38 @@
+name: 02 - Deploy Unmanaged Solution to QA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy Unmanaged Solution to QA
+    runs-on: windows-latest
+
+    steps:
+      # Step 1: Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Install Power Platform CLI
+      - name: Install Power Platform Tools
+        uses: microsoft/powerplatform-actions/actions-install@v1
+
+      # Step 3: Pack solution as Unmanaged
+      - name: Pack solution as Unmanaged
+        uses: microsoft/powerplatform-actions/pack-solution@v1
+        with:
+          solution-folder: solutions/MySolution
+          solution-file: out/MySolution.zip
+          solution-type: Unmanaged
+
+      # Step 4: Import Unmanaged solution into QA
+      - name: Import Unmanaged Solution to QA
+        uses: microsoft/powerplatform-actions/import-solution@v1
+        with:
+          environment-url: ${{ vars.QA_ENV_URL }}
+          app-id: ${{ vars.QA_CLIENT_ID }}
+          client-secret: ${{ secrets.QA_SECRET_VALUE }}
+          tenant-id: ${{ vars.QA_TENANT_ID }}
+          solution-file: out/MySolution.zip
+          force-overwrite: true
+          publish-changes: true
